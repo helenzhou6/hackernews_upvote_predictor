@@ -5,7 +5,7 @@
 ### Prerequisites
 Needed:
 - Python (v3.9.6)
-- Poetry for python package management (`brew install poetry` or see https://python-poetry.org/ to install. v2.1.3 or higher)
+- uv for python package management (https://github.com/astral-sh/uv)
 - .env file needs to be populated correctly (get this from Helen, or the environment variables in this repo). Example contents:
     ```python
     POSTGRES_USERNAME=xxx
@@ -17,12 +17,11 @@ Needed:
     ```
 
 ### Initial python set up
-To run the digit_classifier python files:
-1. Ensure poetry is using python v3.9.6 (see commands listed: https://python-poetry.org/docs/managing-environments/ - e.g. using `poetry env use 3.9`)
-2. `poetry env activate` to use the poetry virtual environment created
+To run the hackernews upvote predictor python files:
+2. `source .venv/bin/activate` to use the poetry virtual environment created
     - (To deactivate virtual env if needed, run `deactivate`)
-3. `poetry install` to install project requirements.
-4. On Mac and VSCode, run Shift Command P and select interpreter as the poetry env created
+3. `uv sync` to install project requirements.
+4. On Mac and VSCode, run Shift Command P and select interpreter as the poetry env created (using .venv within directory)
 
 ### Hacker news database > items info
 - Column info: id, dead, type, by, time, text, parent, kids, url, score, title, descandants 
