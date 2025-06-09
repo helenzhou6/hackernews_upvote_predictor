@@ -16,7 +16,7 @@ Needed:
     DATABASE_API_URL=xxx
     ```
 
-### 1. Initial python set up
+### Initial python set up
 To run the digit_classifier python files:
 1. Ensure poetry is using python v3.9.6 (see commands listed: https://python-poetry.org/docs/managing-environments/ - e.g. using `poetry env use 3.9`)
 2. `poetry env activate` to use the poetry virtual environment created
@@ -24,10 +24,5 @@ To run the digit_classifier python files:
 3. `poetry install` to install project requirements.
 4. On Mac and VSCode, run Shift Command P and select interpreter as the poetry env created
 
-### 2. PostgreSQL database
-Code for the postgreSQL database set up and SQL queries can be found in `src/digit_classifier/database`
-A postgreSQL database is used to log the feedback of the user, along with the prediction and confidence level. All entries to the database is displayed to the user on the frontend.
-
-
-### Data > items
-- id, dead, type, by, time, text, parent, kids, url, score, title, descandants 
+### Hacker news database > items info
+- Column info: id, dead, type, by, time, text, parent, kids, url, score, title, descandants 
