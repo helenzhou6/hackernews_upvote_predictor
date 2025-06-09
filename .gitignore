@@ -1,0 +1,6 @@
+data/
+env/
+*.png
+*.env
+*.pth
+*.pem
