@@ -32,7 +32,7 @@ def prep_target(data):
     return r
 tar = prep_target(df) 
 
-torch.save(fea, "data/features.pk")
-torch.save(tar, "data/target.pk")
+torch.save(fea, "data/features.pt")
+torch.save(tar, "data/target.pt")
 
  
