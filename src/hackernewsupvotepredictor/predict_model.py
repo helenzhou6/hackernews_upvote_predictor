@@ -1,7 +1,7 @@
 import torch 
 import torch.nn as nn
 import torch.optim as optim
-from torchmetrics import MeanSquaredError
+from torchmetrics.regression import MeanSquaredError
  
  
 # load data
@@ -10,12 +10,12 @@ tar = torch.load("data/target.pt")
 
 
 full_dataset = torch.utils.data.TensorDataset(fea,tar)
-train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [0.8, 0.2])
+train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [0.9, 0.1])
 
 # Hyperparameters
-learning_rate = 0.001
+learning_rate = 0.01
 batch_size = 512
-num_epochs = 10
+num_epochs = 20
 num_features = 1
 
 class HNUP(nn.Module):
@@ -46,7 +46,7 @@ def train_model():
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
     # Training loop
-    for epoch in range(5):
+    for epoch in range(num_epochs):
         for batch_idx, (data, targets) in enumerate(train_loader):
             optimizer.zero_grad()
             outputs = model(data)
@@ -60,7 +60,7 @@ train_model()
 
 # tests
 model.eval()
-loader = torch.utils.data.DataLoader(test_dataset, batch_size=100) 
+loader = torch.utils.data.DataLoader(test_dataset, batch_size=500) 
 x_test, y_test = next(iter(loader))  
 preds = model.forward(x_test)
 mse = MeanSquaredError()
