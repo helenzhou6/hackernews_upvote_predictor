@@ -62,7 +62,7 @@ train_model()
 loader = torch.utils.data.DataLoader(test_dataset, batch_size=100)
 x_test, y_test = next(iter(loader))   
 preds = model.forward(x_test)
-mse = MeanSquaredError(num_classes=10, average=None)
+mse = MeanSquaredError()
 mse(preds.squeeze(), y_test)
 
 
