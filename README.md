@@ -4,7 +4,7 @@
 
 ### Prerequisites
 Needed:
-- Python (v3.9.6)
+- Python (v3.13.3) - might work with lower versions, just try it
 - uv for python package management (https://github.com/astral-sh/uv)
 - .env file needs to be populated correctly (get this from Helen, or the environment variables in this repo). Example contents:
     ```python
@@ -21,7 +21,7 @@ To run the hackernews upvote predictor python files:
 2. `source .venv/bin/activate` to use the poetry virtual environment created
     - (To deactivate virtual env if needed, run `deactivate`)
 3. `uv sync` to install project requirements.
-4. On Mac and VSCode, run Shift Command P and select interpreter as the poetry env created (using .venv within directory)
+4. On Mac and VSCode, run Shift Command P and select interpreter as the poetry env created (using .venv within directory), and can run the python files
 
 ### Hacker news database > items info
 - Column info: id, dead, type, by, time, text, parent, kids, url, score, title, descandants 
