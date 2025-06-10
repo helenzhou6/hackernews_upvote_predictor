@@ -3,8 +3,6 @@ from dotenv import load_dotenv
 import os
 import pandas as pd
 
-# os.chdir("C:/Users/andre/Dropbox/MLX/week 1/hackernews_upvote_predictor")
-
 load_dotenv()
 
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
