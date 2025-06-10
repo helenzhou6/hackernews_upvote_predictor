@@ -3,8 +3,6 @@ from dotenv import load_dotenv
 import os
 import pandas as pd
 
-os.chdir("C:/Users/andre/Dropbox/MLX/week 1/hackernews_upvote_predictor")
-
 load_dotenv()
 
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
@@ -46,4 +44,5 @@ df_subs = pd.DataFrame(fetch_subs(), columns = ['id','by','title','score','url',
 df_subs.head()
 df_subs.info()
 
+# Create a folder called data to be able to run the below
 df_subs.to_parquet("data/submissions.parquet.gzip", compression='gzip')  
