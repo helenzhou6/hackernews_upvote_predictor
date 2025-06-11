@@ -3,17 +3,15 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import json
-# import matplotlib.pyplot as plt
+import datetime
 
-# import datetime
+# logging seconds since start
+starttime = datetime.datetime.now()
 
-'''
-import urllib.request
-url = 'https://huggingface.co/datasets/ardMLX/text8/resolve/main/text8'
-response = urllib.request.urlopen(url)
-data = response.read()      # a bytes object
-text = data.decode('utf-8')
-'''
+def log_seconds(now_datetime):
+    delta =  now_datetime - starttime
+    seconds = delta.total_seconds()
+    return seconds
 
 # set the dimension of embeddings
 embedding_dim = 64
@@ -25,8 +23,7 @@ tests = ['anarchism','garden','production']
 with open("data/text8", "r") as f:
   raw_data = f.read()
 
-# test = raw_data[:10000]
-
+# length of raw_data = 100,000,000
 raw_data= raw_data[:100000]
 
 def tokenizer(text):
@@ -51,8 +48,8 @@ vocab = {word: index for index, word in enumerate(revvocab)}
 # Save the vocabulary
 with open("temp/vocabulary.json", "w") as fp:
     json.dump(vocab, fp)
-# with open("temp/vocabulary.json", "r") as fp:
-#     vocab = json.loads(fp)
+
+print(f"Created vocab index, seconds since start of script: {log_seconds(datetime.datetime.now())}")
 
 # encode
 encoded = [vocab.get(w, vocab["<UNKNOWN>"]) for w in updtext]
@@ -81,12 +78,14 @@ target_tensor = torch.tensor(target_data, dtype=torch.long)     # Shape: (N,)
 dataset = torch.utils.data.TensorDataset(context_tensor, target_tensor)
 train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
+print(f"Created datasets, converted to tensor and created dataloader: {log_seconds(datetime.datetime.now())}")
+
 # Model Architecture
 class WordEmbeddings(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.embeddings = nn.Embedding(num_embeddings=len(vocab), embedding_dim=embedding_dim)
+        self.embeddings = nn.Embedding(num_embeddings=len(vocab), embedding_dim=embedding_dim, padding_idx=0)
         self.linear_1 = nn.Linear(in_features=embedding_dim, out_features=len(vocab))
 
     def forward(self, x):
@@ -96,7 +95,9 @@ class WordEmbeddings(nn.Module):
         return x
 
 
-def print_mostsim(w, embeddings, top):
+def print_mostsim(w, embeddings, top, skip_print = False):
+    if skip_print:
+        return
     f = embeddings[w]
     flen = torch.sqrt(torch.dot(f, f))
     simi = [torch.dot(x, f)/flen/ torch.sqrt(torch.dot(x, x)) if i!=w else -1000 for i, x in enumerate(embeddings)]
@@ -131,10 +132,14 @@ for epoch in range(20):
         optimizer.step()
 
     train_loss = train_loss / len(train_dataloader)
-    print(f"Epoch:{epoch} | Training Loss : {train_loss}")
+    print(f"----- Epoch: {epoch} -----")
+    print(f"Training Loss : {train_loss}")
     curemb = model.state_dict()['embeddings.weight']
     for word in tests:
+        # Add skip_print=True to skip this print
         print_mostsim(vocab[word], curemb, 5) 
+
+    print(f"Epoch finished, seconds since start of script: {log_seconds(datetime.datetime.now())}")
     print("\n")
 
 # Save the embeddings
@@ -143,4 +148,6 @@ torch.save(state['embeddings.weight'], 'temp/wikipedia_embeddings.pt')
 torch.save(state, 'temp/wikipedia_model_state.pth')
 # model = WordEmbeddings()
 # model.load_state_dict(torch.load('temp/wikipedia_model_state.pth'))
+
+print(f"Model trained and weights etc saved, seconds since start of script: {log_seconds(datetime.datetime.now())}")
 
