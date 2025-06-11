@@ -36,43 +36,26 @@ def tokenizer(text):
     result = result.replace(", ", " <COMMA> ").replace(". ", " <FULLSTOP> ").replace("'", " <APOSTROPHE> ").replace("!", " <EXCLAMATION>").replace("? ", " <QUESTION> ").replace(": ", " <ELIPSES> ")
     result = result.replace(" aaaaaacceglllnorst ", " <UNKNOWN> ").replace(" aaaaaaccegllnorrst ", " <UNKNOWN> ").replace("  aaaaaah ", " <UNKNOWN> ").replace(" zzurf  ", " <UNKNOWN> ").replace(" zzum  ", " <UNKNOWN> ").replace(" ...  ", " ")
     result = result.replace(" and "," ").replace(" a "," ").replace(" the "," ")
-    return result.split(" ")
-
-# def tokenizer2(text):
-#     # Stemming
-#     result = text.lower().replace("ing ", " ").replace("'s ", " ").replace("es ", "e ").replace("ied ", "y ")
-#     # Replace contents 
-#     result = result.replace(", ", " <COMMA> ").replace(". ", " <FULLSTOP> ").replace("'", " <APOSTROPHE> ").replace("!", " <EXCLAMATION>").replace("? ", " <QUESTION> ").replace(": ", " <COLON> ")
-#     result = result.split(" ")
-#     unk = ["aaaaaacceglllnorst", "aaaaaaccegllnorrst","aaaaaah", "zzurf","zzum"]
-#     rem = ["...","and","a","the"]
-#     result = [s if s not in unk else "<UNKNOWN>" for s in result if s not in rem]     
-#     return result
-
-# ct = datetime.datetime.now()
-# print("current time:", ct)
+    result = result.split(" ")
+    result.remove("")
+    return result
 
 updtext = tokenizer(raw_data)
-# print((datetime.datetime.now() - ct).seconds)
 
-# ct = datetime.datetime.now()
-# print("current time:", ct)
-
-# updtext = tokenizer2(raw_data)
-# print((datetime.datetime.now() - ct).seconds)
-
-# unique, counts = np.unique(np.array(updtext), return_counts=True)
-
-# plt.hist(counts)
-# plt.show()
-
-# encode words
-revvocab = list(set(updtext))
+# create a vocabulary and encode words
+revvocab = set(updtext)
+revvocab.add("<UNKNOWN>")
+revvocab = list(revvocab)
 vocab = {word: index for index, word in enumerate(revvocab)}
 
-# defval = vocab["<UNKNOWN>"] 
-defval = 0
-encoded = [vocab.get(w, defval) for w in updtext]
+# Save the vocabulary
+with open("temp/vocabulary.json", "w") as fp:
+    json.dump(vocab, fp)
+# with open("temp/vocabulary.json", "r") as fp:
+#     vocab = json.loads(fp)
+
+# encode
+encoded = [vocab.get(w, vocab["<UNKNOWN>"]) for w in updtext]
 
 # rolling windows of 5 words
 # Function to generate context generator for CBOW
@@ -115,8 +98,8 @@ class WordEmbeddings(nn.Module):
 
 def print_mostsim(w, embeddings, top):
     f = embeddings[w]
-    flen = torch.sqrt(torch.matmul(first, first))
-    simi = [torch.matmul(x, f)/flen/ torch.sqrt(torch.matmul(x, x)) if i!=w else -1000 for i, x in enumerate(embeddings)]
+    flen = torch.sqrt(torch.dot(f, f))
+    simi = [torch.dot(x, f)/flen/ torch.sqrt(torch.dot(x, x)) if i!=w else -1000 for i, x in enumerate(embeddings)]
     ind = np.argpartition(np.array(simi), -top)[-top:]
     print(f'base word: {revvocab[w]}')
     for i in ind:
@@ -161,8 +144,3 @@ torch.save(state, 'temp/wikipedia_model_state.pth')
 # model = WordEmbeddings()
 # model.load_state_dict(torch.load('temp/wikipedia_model_state.pth'))
 
-# Save the vocabulary
-with open("temp/vocabulary.json", "w") as fp:
-    json.dump(vocab, fp)
-# with open("temp/vocabulary.json", "r") as fp:
-#     vocab = json.loads(fp)
