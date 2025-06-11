@@ -32,7 +32,7 @@ Ensure initial python set up has been done
 1. Run `connect_and_download.py` file - this will connect to the database, and download the hackernews items (joined with user data) into a parquet file
 2. Run `clean_data.py` which will read the above parquet file, and then extract the feature data of how many days the user has existed, as well as the target data (the upvote score)
 3. Run `download_cbow_rawdata.py` that will download the wikipedia text data
-4. Run `cbow.py` that will train a model on the wikipedia text data and create embeddings
+4. Run `main.py` that will use chow.py to create and train a CBOW model on the wikipedia text data and create embeddings
 5. Run `predict_model.py` that will train another model on the feature of how many days since the user has been created
 5. Run `combined_feats.py` that will run the combined model - that takes as an input the CHOW ML model output & user days feature
 
