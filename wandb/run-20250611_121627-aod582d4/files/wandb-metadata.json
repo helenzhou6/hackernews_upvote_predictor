@@ -1,0 +1,14 @@
+{
+  "os":  "Windows-10-10.0.26100-SP0",
+  "python":  "CPython 3.11.5",
+  "startedAt":  "2025-06-11T11:16:27.942013Z",
+  "program":  "<python with no main file>",
+  "git":  {
+    "remote":  "https://github.com/helenzhou6/hackernews_upvote_predictor.git",
+    "commit":  "d6be1962604246b49915cf76e7c91fb3fc8cdd54"
+  },
+  "email":  "andrey.zhirnov@gmail.com",
+  "root":  "C:\\Users\\andre\\Dropbox\\MLX\\week 1\\hackernews\\hackernews_upvote_predictor",
+  "host":  "az",
+  "executable":  "C:\\Users\\andre\\anaconda3\\python.exe"
+}
