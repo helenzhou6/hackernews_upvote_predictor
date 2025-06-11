@@ -135,10 +135,13 @@ for epoch in range(20):
     print(f"----- Epoch: {epoch} -----")
     print(f"Training Loss : {train_loss}")
     curemb = model.state_dict()['embeddings.weight']
-    for word in tests:
-        # Add skip_print=True to skip this print
-        print_mostsim(vocab[word], curemb, 5) 
 
+    with torch.no_grad():
+        for word in tests:
+            # Add skip_print=True to skip this print
+            print_mostsim(vocab[word], curemb, 5) 
+
+    torch.cuda.empty_cache()
     print(f"Epoch finished, seconds since start of script: {log_seconds(datetime.datetime.now())}")
     print("\n")
 
