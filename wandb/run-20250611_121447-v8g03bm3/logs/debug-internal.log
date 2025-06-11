@@ -1,8 +1,0 @@
-{"time":"2025-06-11T12:14:47.4027552+01:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"C:\\Users\\andre\\Dropbox\\MLX\\week 1\\hackernews\\hackernews_upvote_predictor\\wandb\\run-20250611_121447-v8g03bm3\\logs\\debug-core.log"}
-{"time":"2025-06-11T12:14:47.7687246+01:00","level":"INFO","msg":"stream: created new stream","id":"v8g03bm3"}
-{"time":"2025-06-11T12:14:47.7687246+01:00","level":"INFO","msg":"stream: started","id":"v8g03bm3"}
-{"time":"2025-06-11T12:14:47.7687246+01:00","level":"INFO","msg":"writer: Do: started","stream_id":"v8g03bm3"}
-{"time":"2025-06-11T12:14:47.7687246+01:00","level":"INFO","msg":"sender: started","stream_id":"v8g03bm3"}
-{"time":"2025-06-11T12:14:47.7687246+01:00","level":"INFO","msg":"handler: started","stream_id":"v8g03bm3"}
-{"time":"2025-06-11T12:14:47.8819216+01:00","level":"ERROR","msg":"HTTP error","status":403,"method":"POST","url":"https://api.wandb.ai/graphql"}
-{"time":"2025-06-11T12:14:47.8819216+01:00","level":"ERROR","msg":"runupserter: failed to init run","error":"returned error 403: {\"data\":{\"upsertBucket\":null},\"errors\":[{\"message\":\"permission denied\",\"path\":[\"upsertBucket\"],\"extensions\":{\"code\":\"PERMISSION_ERROR\"}}]}"}
