@@ -66,8 +66,5 @@ preds = model.forward(x_test)
 mse = MeanSquaredError()
 mse(preds.squeeze(), y_test)
 
-
-
-
-
-
+# saving - outputs a Tensor that has shape of [500, 1]
+torch.save(preds, 'temp/user_days_output.pt')

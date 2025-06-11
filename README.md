@@ -33,6 +33,8 @@ Ensure initial python set up has been done
 2. Run `clean_data.py` which will read the above parquet file, and then extract the feature data of how many days the user has existed, as well as the target data (the upvote score)
 3. Run `download_cbow_rawdata.py` that will download the wikipedia text data
 4. Run `cbow.py` that will train a model on the wikipedia text data and create embeddings
+5. Run `predict_model.py` that will train another model on the feature of how many days since the user has been created
+5. Run `combined_feats.py` that will run the combined model - that takes as an input the CHOW ML model output & user days feature
 
 ## How to make changes to the codebase
 1. Ensure you are on the main branch `git checkout main`
