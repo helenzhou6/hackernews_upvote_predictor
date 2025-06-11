@@ -21,20 +21,32 @@ tests = ['anarchism','garden','production']
 
 # Tokenizing
 def tokenizer(text):
-    # Stemming
-    result = text.lower().replace("ing ", " ").replace("'s ", " ").replace("es ", "e ").replace("ied ", "y ")
-    # Replace contents
-    result = result.replace(", ", " <COMMA> ").replace(". ", " <FULLSTOP> ").replace("'", " <APOSTROPHE> ").replace("!", " <EXCLAMATION>").replace("? ", " <QUESTION> ").replace(": ", " <ELIPSES> ")
-    result = result.replace(" aaaaaacceglllnorst ", " <UNKNOWN> ").replace(" aaaaaaccegllnorrst ", " <UNKNOWN> ").replace("  aaaaaah ", " <UNKNOWN> ").replace(" zzurf  ", " <UNKNOWN> ").replace(" zzum  ", " <UNKNOWN> ").replace(" ...  ", " ")
-    result = result.replace(" and "," ").replace(" a "," ").replace(" the "," ")
-    result = result.split(" ")
-    result.remove("")
+    result = text.lower()
+    conv ={",":"<COMMA>", "\.\.\.":" <ELLIPSES> ", "\.": " <FULLSTOP> ",
+           "\'": " <APOSTROPHE> ", "!": " <EXCLAMATION> ", "\?": " <QUESTION> ", ":": " <COLON> ",}
+    for ins, outs in conv.items():
+        result = result.replace(ins, outs)
+    result = result.split(" ") 
+    result = [w for w in result if len(w)>0 and w not in ['and','the','a','of','in','to']] 
+    stems = set(result)
+    result = [ s[:-1] if s[-1]=="s" and s[:-1] in stems else s for s in result ]
+    result = [ s[:-4] if s[-4:]=="ning" and s[:-4] in stems else s for s in result ]    
+    result = [ s[:-4] if s[-4:]=="ming" and s[:-4] in stems else s for s in result ]   
+    result = [ s[:-3] if s[-3:]=="ing" and s[:-3] in stems else s for s in result ]   
+    result = [ s[:-3] + 'y' if s[-3:]=="ied" and s[:-3] + 'y' in stems else s for s in result ]
+    result = [ s[:-2] if s[-2:]=="ed" and s[:-2] in stems else s for s in result ]   
+    result = [ s[:-2]+'e' if s[-2:]=="ed" and s[:-2]+'e' in stems else s for s in result ]
     return result
+
+def replace_rare(wordlist, limit):
+    uni, counts = np.unique(wordlist, return_counts=True)
+    unks  = set(uni[counts<limit])
+    return ["<UNKNOWN>" if w in unks else w for w in wordlist]
 
 class Tokenizer():
     def __init__(self, data):
         self.data = data
-        updtext = tokenizer(data)
+        updtext = replace_rare(tokenizer(data))
 
         # create a vocabulary and encode words
         revvocab = set(updtext)
