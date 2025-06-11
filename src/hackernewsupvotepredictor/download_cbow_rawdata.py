@@ -7,3 +7,9 @@ text = data.decode('utf-8')
 
 with open('data/text8', 'w') as file:
     file.write(text)
+
+def download_wiki_data(url):
+    response = urllib.request.urlopen(url)
+    data = response.read()      # a bytes object
+    text = data.decode('utf-8')
+    return text

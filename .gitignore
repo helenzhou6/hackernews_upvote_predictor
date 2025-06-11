@@ -7,3 +7,5 @@ wandb/
 *.pth
 *.pem
 .venv
+__pycache__/
+*.egg-info
