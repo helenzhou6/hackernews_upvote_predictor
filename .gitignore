@@ -8,3 +8,4 @@ wandb/
 *.pem
 .venv
 __pycache__/
+*.egg-info
