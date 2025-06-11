@@ -1,6 +1,7 @@
 data/
 temp/
 env/
+wandb/
 *.png
 *.env
 *.pth
