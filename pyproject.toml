@@ -10,6 +10,7 @@ dependencies = [
     "psycopg2-binary>=2.9.10",
     "pyarrow>=20.0.0",
     "python-dotenv>=1.1.0",
+    "scipy>=1.15.3",
     "torch>=2.7.1",
     "torchmetrics>=1.7.2",
 ]
