@@ -3,17 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import json
-# import matplotlib.pyplot as plt
-
-# import datetime
-
-'''
-import urllib.request
-url = 'https://huggingface.co/datasets/ardMLX/text8/resolve/main/text8'
-response = urllib.request.urlopen(url)
-data = response.read()      # a bytes object
-text = data.decode('utf-8')
-'''
+import datetime
 
 # set the dimension of embeddings
 embedding_dim = 64
@@ -24,8 +14,6 @@ tests = ['anarchism','garden','production']
 # read Wikipedia data and tokenize
 with open("data/text8", "r") as f:
   raw_data = f.read()
-
-# test = raw_data[:10000]
 
 raw_data= raw_data[:100000]
 
@@ -51,8 +39,6 @@ vocab = {word: index for index, word in enumerate(revvocab)}
 # Save the vocabulary
 with open("temp/vocabulary.json", "w") as fp:
     json.dump(vocab, fp)
-# with open("temp/vocabulary.json", "r") as fp:
-#     vocab = json.loads(fp)
 
 # encode
 encoded = [vocab.get(w, vocab["<UNKNOWN>"]) for w in updtext]
@@ -131,7 +117,8 @@ for epoch in range(20):
         optimizer.step()
 
     train_loss = train_loss / len(train_dataloader)
-    print(f"Epoch:{epoch} | Training Loss : {train_loss}")
+    print(f"----- Epoch: {epoch} -----")
+    print(f"Training Loss : {train_loss}")
     curemb = model.state_dict()['embeddings.weight']
     for word in tests:
         print_mostsim(vocab[word], curemb, 5) 
