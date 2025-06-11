@@ -16,8 +16,10 @@ text = data.decode('utf-8')
 '''
 
 # set the dimension of embeddings
-embedding_dim = 32
+embedding_dim = 64
 batch_size = 512
+
+tests = ['anarchism','garden','production']
 
 # read Wikipedia data and tokenize
 with open("data/text8", "r") as f:
@@ -65,7 +67,9 @@ updtext = tokenizer(raw_data)
 # plt.show()
 
 # encode words
-vocab = {word: index for index, word in enumerate(set(updtext))}
+revvocab = list(set(updtext))
+vocab = {word: index for index, word in enumerate(revvocab)}
+
 # defval = vocab["<UNKNOWN>"] 
 defval = 0
 encoded = [vocab.get(w, defval) for w in updtext]
@@ -109,15 +113,24 @@ class WordEmbeddings(nn.Module):
         return x
 
 
+def print_mostsim(w, embeddings, top):
+    f = embeddings[w]
+    flen = torch.sqrt(torch.matmul(first, first))
+    simi = [torch.matmul(x, f)/flen/ torch.sqrt(torch.matmul(x, x)) if i!=w else -1000 for i, x in enumerate(embeddings)]
+    ind = np.argpartition(np.array(simi), -top)[-top:]
+    print(f'base word: {revvocab[w]}')
+    for i in ind:
+        print(revvocab[i])
+
 # Training Setup
 model = WordEmbeddings()
-optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.95)
+optimizer = optim.Adam(model.parameters(), lr=0.05)
 loss_fn = nn.CrossEntropyLoss()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Training Loop
-for epoch in range(11):
+for epoch in range(20):
     train_loss = 0
     model.train()
     for feature, label in train_dataloader:
@@ -136,7 +149,10 @@ for epoch in range(11):
 
     train_loss = train_loss / len(train_dataloader)
     print(f"Epoch:{epoch} | Training Loss : {train_loss}")
-
+    curemb = model.state_dict()['embeddings.weight']
+    for word in tests:
+        print_mostsim(vocab[word], curemb, 5) 
+    print("\n")
 
 # Save the embeddings
 state = model.state_dict()
