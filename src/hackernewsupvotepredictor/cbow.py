@@ -13,10 +13,6 @@ def log_seconds(now_datetime):
     seconds = delta.total_seconds()
     return seconds
 
-# set the dimension of embeddings
-embedding_dim = 64
-batch_size = 512
-
 tests = ['anarchism','garden','production']
 
 # Tokenizing
@@ -76,18 +72,19 @@ class Tokenizer():
 
 # Model Architecture
 class WordEmbeddings(nn.Module):
-    def __init__(self, data, tokenizer):
+    def __init__(self, data, tokenizer, embedding_dim, batch_size):
         super().__init__()
         self.data = data
         self.embeddings = nn.Embedding(num_embeddings=len(tokenizer.vocab), embedding_dim=embedding_dim, padding_idx=0)
         self.linear_1 = nn.Linear(in_features=embedding_dim, out_features=len(tokenizer.vocab))
+        self.tokenizer = tokenizer
 
     def forward(self, x):
         x = self.embeddings(x)
         x = x.mean(axis=1)
         x = self.linear_1(x)
         return x
-
+    
 # rolling windows of 5 words
  # Function to generate context generator for CBOW
 def _generate_cbow_data_context(sequence, context_size): 
@@ -102,7 +99,7 @@ def _generate_cbow_data_target(sequence, context_size):
         yield target
 
 # Training Setup
-def train_model(model, tokenizer):
+def train_cbow_model(model, tokenizer, batch_size):
     # Create datasets
     context_data = list(_generate_cbow_data_context(tokenizer.encoded, 2))
     target_data = list(_generate_cbow_data_target(tokenizer.encoded, 2))
