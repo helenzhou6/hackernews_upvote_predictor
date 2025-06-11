@@ -46,7 +46,7 @@ def replace_rare(wordlist, limit):
 class Tokenizer():
     def __init__(self, data):
         self.data = data
-        updtext = replace_rare(tokenizer(data))
+        updtext = replace_rare(tokenizer(data), 5)
 
         # create a vocabulary and encode words
         revvocab = set(updtext)
