@@ -5,6 +5,7 @@ import numpy as np
 import json
 # import matplotlib.pyplot as plt
 
+# import datetime
 
 '''
 import urllib.request
@@ -15,8 +16,8 @@ text = data.decode('utf-8')
 '''
 
 # set the dimension of embeddings
-embedding_dim = 16
-batch_size = 1024
+embedding_dim = 32
+batch_size = 512
 
 # read Wikipedia data and tokenize
 with open("data/text8", "r") as f:
@@ -24,15 +25,40 @@ with open("data/text8", "r") as f:
 
 # test = raw_data[:10000]
 
+raw_data= raw_data[:100000]
+
 def tokenizer(text):
     # Stemming
     result = text.lower().replace("ing ", " ").replace("'s ", " ").replace("es ", "e ").replace("ied ", "y ")
     # Replace contents
     result = result.replace(", ", " <COMMA> ").replace(". ", " <FULLSTOP> ").replace("'", " <APOSTROPHE> ").replace("!", " <EXCLAMATION>").replace("? ", " <QUESTION> ").replace(": ", " <ELIPSES> ")
     result = result.replace(" aaaaaacceglllnorst ", " <UNKNOWN> ").replace(" aaaaaaccegllnorrst ", " <UNKNOWN> ").replace("  aaaaaah ", " <UNKNOWN> ").replace(" zzurf  ", " <UNKNOWN> ").replace(" zzum  ", " <UNKNOWN> ").replace(" ...  ", " ")
+    result = result.replace(" and "," ").replace(" a "," ").replace(" the "," ")
     return result.split(" ")
 
+# def tokenizer2(text):
+#     # Stemming
+#     result = text.lower().replace("ing ", " ").replace("'s ", " ").replace("es ", "e ").replace("ied ", "y ")
+#     # Replace contents 
+#     result = result.replace(", ", " <COMMA> ").replace(". ", " <FULLSTOP> ").replace("'", " <APOSTROPHE> ").replace("!", " <EXCLAMATION>").replace("? ", " <QUESTION> ").replace(": ", " <COLON> ")
+#     result = result.split(" ")
+#     unk = ["aaaaaacceglllnorst", "aaaaaaccegllnorrst","aaaaaah", "zzurf","zzum"]
+#     rem = ["...","and","a","the"]
+#     result = [s if s not in unk else "<UNKNOWN>" for s in result if s not in rem]     
+#     return result
+
+# ct = datetime.datetime.now()
+# print("current time:", ct)
+
 updtext = tokenizer(raw_data)
+# print((datetime.datetime.now() - ct).seconds)
+
+# ct = datetime.datetime.now()
+# print("current time:", ct)
+
+# updtext = tokenizer2(raw_data)
+# print((datetime.datetime.now() - ct).seconds)
+
 # unique, counts = np.unique(np.array(updtext), return_counts=True)
 
 # plt.hist(counts)
@@ -40,7 +66,8 @@ updtext = tokenizer(raw_data)
 
 # encode words
 vocab = {word: index for index, word in enumerate(set(updtext))}
-defval = vocab["<UNKNOWN>"] 
+# defval = vocab["<UNKNOWN>"] 
+defval = 0
 encoded = [vocab.get(w, defval) for w in updtext]
 
 # rolling windows of 5 words
@@ -101,7 +128,7 @@ for epoch in range(11):
         y_train_pred = model(feature)
 
         loss = loss_fn(y_train_pred, label)
-        train_loss = train_loss + loss
+        train_loss += loss
 
         optimizer.zero_grad()
         loss.backward()
@@ -109,6 +136,7 @@ for epoch in range(11):
 
     train_loss = train_loss / len(train_dataloader)
     print(f"Epoch:{epoch} | Training Loss : {train_loss}")
+
 
 # Save the embeddings
 state = model.state_dict()
@@ -118,7 +146,7 @@ torch.save(state, 'temp/wikipedia_model_state.pth')
 # model.load_state_dict(torch.load('temp/wikipedia_model_state.pth'))
 
 # Save the vocabulary
-with open("temp/vocabulary.txt", "w") as fp:
+with open("temp/vocabulary.json", "w") as fp:
     json.dump(vocab, fp)
-# with open("temp/vocabulary.txt", "r") as fp:
+# with open("temp/vocabulary.json", "r") as fp:
 #     vocab = json.loads(fp)
