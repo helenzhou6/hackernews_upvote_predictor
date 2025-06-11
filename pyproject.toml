@@ -14,3 +14,5 @@ dependencies = [
     "torch>=2.7.1",
     "torchmetrics>=1.7.2",
 ]
+[tool.uv]
+package = true

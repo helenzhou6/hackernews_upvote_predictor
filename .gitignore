@@ -7,3 +7,4 @@ wandb/
 *.pth
 *.pem
 .venv
+__pycache__/
