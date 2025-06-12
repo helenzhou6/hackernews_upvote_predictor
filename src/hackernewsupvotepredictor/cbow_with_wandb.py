@@ -48,8 +48,11 @@ def replace_rare(wordlist, limit):
     unks  = set(uni[counts<limit])
     return ["<UNKNOWN>" if w in unks else w for w in wordlist]
  
-fulltext = replace_rare(tokenizer(raw_data), 5)
+# fulltext = replace_rare(tokenizer(raw_data), 5)
 
+with open("temp/wikipedia_tokenized.json", 'r') as f:
+    fulltext = json.load(f)
+ 
 # pick a sample
 updtext = fulltext[:num_words]
 
@@ -110,9 +113,8 @@ class WordEmbeddings(nn.Module):
         x = self.linear_1(x)
         return x
 
-def train(model, train_loader, criterion, optimizer, config):
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
+def train(model, train_loader, criterion, optimizer, config, device): 
+    
     # Training Loop
     for epoch in range(config.epochs):
         train_loss = 0
@@ -131,11 +133,11 @@ def train(model, train_loader, criterion, optimizer, config):
             loss.backward()
             optimizer.step() 
 
-        train_loss = train_loss / len(train_dataloader)
+        train_loss = train_loss / len(train_loader)
         wandb.log({"epoch": epoch, "loss": float(train_loss)})
         print(f"Epoch:{epoch} | Training Loss : {train_loss}") 
         
-def test(model, test_loader):
+def test(model, test_loader, device): 
     model.eval()
     
     correct, total = 0, 0
@@ -172,6 +174,7 @@ def make(config):
     test_loader = torch.utils.data.DataLoader(ds_test, batch_size=config.batch_size)
 
     # Make the model
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = WordEmbeddings().to(device)
 
     # Make the loss and optimizer
@@ -191,12 +194,14 @@ def model_pipeline(hyperparameters):
       # make the model, data, and optimization problem
       model, train_loader, test_loader, criterion, optimizer = make(config)
       print(model)
+      
+      device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
       # and use them to train the model
-      train(model, train_loader, criterion, optimizer, config)
+      train(model, train_loader, criterion, optimizer, config, device)
 
       # and test its final performance
-      test(model, test_loader)
+      test(model, test_loader, device)
 
     return model
 

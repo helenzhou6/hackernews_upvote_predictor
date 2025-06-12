@@ -13,6 +13,7 @@ dependencies = [
     "scipy>=1.15.3",
     "torch>=2.7.1",
     "torchmetrics>=1.7.2",
+    "wandb>=0.20.1",
 ]
 [tool.uv]
 package = true
