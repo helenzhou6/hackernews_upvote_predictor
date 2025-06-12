@@ -34,7 +34,6 @@ class CombineFeats(nn.Module):
         x = self.lin2(x) # final output layer
         return x
 
-
 def combine_feat(user_days_data):
     user_days_ft = torch.permute(user_days_data, (1, 0))
     return user_days_ft

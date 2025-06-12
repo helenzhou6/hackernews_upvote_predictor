@@ -113,9 +113,9 @@ def main():
 
     # train
     for batch_idx, data in enumerate(train_dataloader):
-        titles_b = data["title"]
-        users_b = data["user_days"]
-        target_b = data["label"]
+        titles_b = data["title"] # [4,100] or [batch, word_lengh]
+        users_b = data["user_days"] # [4,1] or [batch, single_score]
+        target_b = data["label"] # [4,1] or [batch, single_score]
 
         data_b = (titles_b, users_b)
 

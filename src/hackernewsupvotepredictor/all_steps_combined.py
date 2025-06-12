@@ -10,7 +10,7 @@ class CombinedAllModel(nn.Module):
 
         # Example: 1 linear layer per base model
         self.linears = nn.ModuleList([
-            nn.Linear(100, 1) for _ in base_models
+            nn.Linear(544, 1) for _ in base_models
         ])
 
         # Final processing models
@@ -20,6 +20,8 @@ class CombinedAllModel(nn.Module):
     def forward(self, x):
 
         titles_b, users_b = x
+
+        print(self.base_models, self.linears)
 
         outputs = []
 
