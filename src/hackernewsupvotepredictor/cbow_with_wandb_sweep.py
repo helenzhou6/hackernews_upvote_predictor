@@ -16,7 +16,7 @@ torch.cuda.manual_seed_all(hash("so runs are repeatable") % 2**32 - 1)
 
 # set the dimension of embeddings
 embedding_dim = 64 
-num_words = 20000
+num_words = 25000
 
 # read Wikipedia data and tokenize
 with open("data/text8", "r") as f:
@@ -47,8 +47,15 @@ def replace_rare(wordlist, limit):
     uni, counts = np.unique(wordlist, return_counts=True)
     unks  = set(uni[counts<limit])
     return ["<UNKNOWN>" if w in unks else w for w in wordlist]
- 
+
+"""
 fulltext = replace_rare(tokenizer(raw_data), 5)
+with open("temp/wikipedia_tokenized.json", 'w') as f:
+    json.dump(fulltext, f, indent=2)
+"""
+
+with open("temp/wikipedia_tokenized.json", 'r') as f:
+    fulltext = json.load(f)
 
 # pick a sample
 updtext = fulltext[:num_words]
@@ -115,7 +122,7 @@ def train(model, train_loader, criterion, optimizer, config):
 
     # Training Loop
     for epoch in range(config.epochs):
-        train_loss = 0
+#        train_loss = 0
         model.train()
         for feature, label in train_loader:
             model = model.to(device)
@@ -125,17 +132,17 @@ def train(model, train_loader, criterion, optimizer, config):
             y_train_pred = model(feature)
 
             loss = criterion(y_train_pred, label)
-            train_loss = train_loss + loss
+ #           train_loss = train_loss + loss
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step() 
 
-        train_loss = train_loss / len(train_dataloader)
-        wandb.log({"epoch": epoch, "loss": float(train_loss)})
-        print(f"Epoch:{epoch} | Training Loss : {train_loss}") 
-        
+ #       print(f"Epoch:{epoch} | Training Loss : {train_loss}") 
+    print("Training is done")
+      
 def test(model, test_loader):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.eval()
     
     correct, total = 0, 0
@@ -148,35 +155,10 @@ def test(model, test_loader):
         _, predicted = torch.max(outputs.data, 1)
         total += label.size(0)
         correct += (predicted == label).sum().item()
-     
-        print(f"Accuracy of the model on the {total} " +
-              f"contexts: {correct / total:%}")
-        
-        wandb.log({"test_accuracy": correct / total})
-
-    # # Save the model in the exchangeable ONNX format
-    # torch.onnx.export(model, feature, "model.onnx")
-    # wandb.save("model.onnx")
     
-    
-#### wandb pieces
-sweep_configuration = {
-    "name": "HNUP-CBOW-sweep",
-    "method": "bayes",
-    "metric": {"goal": "maximize", "name": "test_accuracy"},
-    "parameters": {
-        "learning_rate": {"min": 0.0001, "max": 0.1},
-        "batch_size": {"values": [16, 32, 64, 128, 256]},
-        "epochs": {"values": [10, 15, 20]},
-    },
-}
+    acc = correct / total
+    return acc
 
-
-config = dict(
-    epochs=20,
-    batch_size=512,
-    learning_rate=0.005,
-    )
 
 def make(config):
     # Make the data 
@@ -184,6 +166,7 @@ def make(config):
     test_loader = torch.utils.data.DataLoader(ds_test, batch_size=config.batch_size)
 
     # Make the model
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = WordEmbeddings().to(device)
 
     # Make the loss and optimizer
@@ -193,24 +176,35 @@ def make(config):
     return model, train_loader, test_loader, criterion, optimizer
 
 
-def model_pipeline(hyperparameters):
+def objective(config):
 
-    # tell wandb to get started
-    with wandb.init(project="HNUP-CBOW", config=hyperparameters):
-      # access all HPs through wandb.config, so logging matches execution!
-      config = wandb.config
+   # make the model, data, and optimization problem
+    model, train_loader, test_loader, criterion, optimizer = make(config)
 
-      # make the model, data, and optimization problem
-      model, train_loader, test_loader, criterion, optimizer = make(config)
-      print(model)
+    # and use them to train the model
+    train(model, train_loader, criterion, optimizer, config)
 
-      # and use them to train the model
-      train(model, train_loader, criterion, optimizer, config)
+    # and test its final performance
+    return test(model, test_loader)
 
-      # and test its final performance
-      test(model, test_loader)
+def main():
+    run = wandb.init(config=wandb.config)
+    accuracy = objective(wandb.config)
+    wandb.log({"accuracy": accuracy})
+    run.finish()
 
-    return model
+sweep_configuration = { 
+    "name": "new_sweep",
+    "method": "bayes",
+    "metric": {"goal": "maximize", "name": "accuracy"},
+    "parameters": {
+        "learning_rate": {"min": 0.0001, "max": 0.1},
+        "batch_size": {"values": [16, 32, 64, 128, 256]},
+        "epochs": {"values": [10, 15, 20]},
+    },
+}
 
-model_pipeline(config)
- 
+sweep_id = wandb.sweep(sweep=sweep_configuration, project="HNUP-CBOW-SWEEP", entity="ayzor-mlx")
+
+wandb.agent(sweep_id, function=main, count=15)
+
