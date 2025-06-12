@@ -40,7 +40,7 @@ def replace_rare(wordlist, limit):
     return ["<UNKNOWN>" if w in unks else w for w in wordlist]
 
 class Tokenizer():
-    def __init__(self, data):
+    def __init__(self, data, vocab_json_filename):
         self.data = data
         updtext = replace_rare(tokenizer(data), 5)
 
@@ -51,7 +51,7 @@ class Tokenizer():
         self.vocab = {word: index for index, word in enumerate(revvocab)}
 
         # Save the vocabulary
-        with open("temp/vocabulary.json", "w") as fp:
+        with open(vocab_json_filename, "w") as fp:
             json.dump(self.vocab, fp)
 
         print(f"Created vocab index, seconds since start of script: {log_seconds(datetime.datetime.now())}")
