@@ -13,4 +13,5 @@ dependencies = [
     "python-dotenv>=1.1.0",
     "torch==2.2.0",
     "torchmetrics>=1.7.2",
+    "wandb>=0.20.1",
 ]
