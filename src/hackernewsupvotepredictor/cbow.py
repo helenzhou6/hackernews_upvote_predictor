@@ -13,7 +13,7 @@ def log_seconds(now_datetime):
     seconds = delta.total_seconds()
     return seconds
 
-tests = ['anarchism','garden','production']
+tests = ['anarchism','production']
 
 # Tokenizing
 def tokenizer(text):
@@ -72,9 +72,8 @@ class Tokenizer():
 
 # Model Architecture
 class WordEmbeddings(nn.Module):
-    def __init__(self, data, tokenizer, embedding_dim, batch_size):
-        super().__init__()
-        self.data = data
+    def __init__(self, tokenizer, embedding_dim):
+        super(WordEmbeddings, self).__init__()
         self.embeddings = nn.Embedding(num_embeddings=len(tokenizer.vocab), embedding_dim=embedding_dim, padding_idx=0)
         self.linear_1 = nn.Linear(in_features=embedding_dim, out_features=len(tokenizer.vocab))
         self.tokenizer = tokenizer
@@ -145,7 +144,7 @@ def train_cbow_model(model, tokenizer, batch_size):
         with torch.no_grad():
             for word in tests:
                 # Add skip_print=True to skip this print
-                tokenizer.print_mostsim(tokenizer.vocab[word], curemb, 5) 
+                tokenizer.print_mostsim(tokenizer.vocab[word], curemb, 5, skip_print=True) 
 
         torch.cuda.empty_cache()
         print(f"Epoch finished, seconds since start of script: {log_seconds(datetime.datetime.now())}")
@@ -153,7 +152,7 @@ def train_cbow_model(model, tokenizer, batch_size):
 
     # Save the embeddings
     state = model.state_dict()
-    torch.save(state['embeddings.weight'], 'temp/wikipedia_embeddings.pt')
+    torch.save(state, 'temp/wikipedia_embeddings.pt')
     torch.save(state, 'temp/wikipedia_model_state.pth')
     # model = WordEmbeddings()
     # model.load_state_dict(torch.load('temp/wikipedia_model_state.pth'))
