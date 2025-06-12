@@ -92,6 +92,11 @@ combined_model = CombinedAllModel(
     predict_model=model5
 )
 
+
+# optimizer
+# loss_func
+
+
 ### during training
 
 # Step 2: Freeze base models
