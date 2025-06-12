@@ -98,6 +98,13 @@ def _generate_cbow_data_target(sequence, context_size):
         yield target
 
 # Training Setup
+# def test_input_format_cbow_model(model, tokenizer, batch_size):
+#     # Create datasets
+#     context_data = list(_generate_cbow_data_context(tokenizer.encoded, 2))
+#     print(context_data)
+#     print(f"context_data size {len(context_data)}, context_data dtype {type(context_data)}")
+
+# Training Setup
 def train_cbow_model(model, tokenizer, batch_size):
     # Create datasets
     context_data = list(_generate_cbow_data_context(tokenizer.encoded, 2))

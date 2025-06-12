@@ -55,10 +55,13 @@ class CombinedAllModel(nn.Module):
         self.predict_model = predict_model    # final prediction
 
     def forward(self, x):
+
+        titles_b, users_b = x
+
         outputs = []
 
         for model, linear in zip(self.base_models, self.linears):
-            out = model(x)
+            out = model(titles_b) # this data should be 
             out = linear(out)
             outputs.append(out)
 

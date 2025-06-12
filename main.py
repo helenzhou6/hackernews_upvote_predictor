@@ -1,11 +1,57 @@
 # from hackernewsupvotepredictor.download_cbow_rawdata import download_data_from_url
-from hackernewsupvotepredictor.cbow import WordEmbeddings, train_cbow_model, Tokenizer
+from hackernewsupvotepredictor.cbow import WordEmbeddings, train_cbow_model, Tokenizer, tokenizer
 from hackernewsupvotepredictor.combined_feats import CombineFeats, combine_feat
 from hackernewsupvotepredictor.download_hn_title_data import download_hn_title_data
-# from hackernewsupvotepredictor.all_steps_combined import CombinedAllModel
+from hackernewsupvotepredictor.all_steps_combined import CombinedAllModel
 from hackernewsupvotepredictor.predict_model import HNUP
 import torch.nn as nn
 import torch
+from torch.utils.data import DataLoader
+from torch.nn.utils.rnn import pad_sequence
+import torch.optim as optim
+from datasets import Dataset
+import pandas as pd
+
+# def pad_collate(batch):
+#   (xx, yy) = zip(*batch)
+#   x_lens = [len(x) for x in xx]
+#   y_lens = [len(y) for y in yy]
+
+#   xx_pad = pad_sequence(xx, batch_first=True, padding_value=0)
+#   yy_pad = pad_sequence(yy, batch_first=True, padding_value=0)
+
+#   return xx_pad, yy_pad, x_lens, y_lens
+
+def pad_collate(batch, max_len=100):
+    # Extract each field into separate lists
+    titles = [item["title"] for item in batch]
+    # user_days = [item["user_days"] for item in batch]
+    # labels = [item["label"] for item in batch]
+
+    # # Get original lengths (if needed)
+    # title_lens = [len(x) for x in titles]
+
+    # Pad titles to max_len
+    titles_padded = []
+    for seq in titles:
+        padded = torch.cat([seq, torch.zeros(max_len - len(seq), dtype=torch.long)]) if len(seq) < max_len else seq
+        titles_padded.append(padded)
+
+    titles_padded = torch.stack(titles_padded)  # (batch_size, 200)
+
+    # # Pad sequences
+    # titles_padded = pad_sequence(titles, batch_first=True, padding_value=0,)
+    # titles_padded = [...titles_padded ]
+
+    # # Stack scalar labels into a tensor
+    # labels = torch.stack(labels)
+
+    return {
+        "title": titles_padded,
+        "user_days": [item["user_days"] for item in batch],
+        "label": [item["label"] for item in batch],
+        # "title_lens": title_lens,
+    }
 
 
 def main():
@@ -29,29 +75,74 @@ def main():
         hn_title_data = f.read()
     hn_title_data = hn_title_data[:10_000]
     title_model = WordEmbeddings(wiki_tokenizer, embedding_dim)
-    # title_model.load_state_dict(torch.load('temp/wikipedia_embeddings.pt', weights_only=True))
+    title_model.load_state_dict(torch.load('temp/wikipedia_embeddings.pt', weights_only=True))
 
     ### Combine the features into a combined ML model
     # Num of days user has been around as first feature - ML predict output. Output is FloatTensor
     user_days_raw = torch.load('temp/user_days_output.pt')
-    combimed_data = combine_feat(user_days_raw)
-    print(f"combimed_data shape: {combimed_data.shape}")
+
+    all_data = pd.read_csv("data/all_data.csv")
+    title_data = all_data["title"]
+    title_tokenizer = Tokenizer(title_data.to_csv(), "temp/title_vocab.json")
+    all_data["title_encoding"] = title_data.astype('str').apply(lambda title_data: [title_tokenizer.vocab[word] if title_tokenizer.vocab.get(word, None) else title_tokenizer.vocab.get("<UNKNOWN>") for title in title_data for word in tokenizer(title)])
+
+    ds = Dataset.from_dict({
+        "title": all_data["title_encoding"], 
+        'user_days': all_data["diff"], 
+        "label": all_data["score"]
+        }
+        ).with_format("torch")
+
+    print(f"this is dataset format {ds}")
+
+    train_ds, test_ds = torch.utils.data.random_split(ds, [0.9, 0.1])
+    train_dataloader = DataLoader(train_ds, batch_size=4, collate_fn=pad_collate)
+    test_dataloader = DataLoader(test_ds, batch_size=4, collate_fn=pad_collate)
+
+    # define models
+    pred_ft_model = HNUP()
     combined_ft_model = CombineFeats(500)
 
-    combined_out = combined_ft_model.forward(combimed_data)
-    print(f"combined_out shape: {combined_out.shape}")
-    pred_ft_model = HNUP()
-    pred_score = pred_ft_model.forward(combined_out)
-    print(f"Prediction score shape: {pred_score.shape}")
+    base_models = [title_model]
+    models = CombinedAllModel(base_models, combined_ft_model, pred_ft_model)
+    # combimed_data = combine_feat()
 
-    # models_tmp = CombinedAllModel()
+    lr = 0.01
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(models.parameters(), lr=lr)
 
-    # # Step 1: Initialize model
-    # models = models_tmp(
-    #     base_models=[model1, model2, model3],
-    #     combined_model=model4,
-    #     predict_model=model5
-    # )
+    # train
+    for batch_idx, data in enumerate(train_dataloader):
+        titles_b = data["title"] # [4,100] or [batch, word_lengh]
+        users_b = data["user_days"] # [4,1] or [batch, single_score]
+        target_b = data["label"] # [4,1] or [batch, single_score]
+
+        data_b = (titles_b, users_b)
+
+        optimizer.zero_grad()
+        outputs = models(data_b)
+        loss = criterion(outputs, target_b)
+        loss.backward()
+        optimizer.step()
+    
+    print(f'Loss: {loss.item():.4f}')
+
+        # test_input_format_cbow_model(cbow_model, title_tokenizer, batch_size)    
+        # user_days_raw = hacker_news_data["user_account_date"]
+        # print(f"combimed_data shape: {combimed_data.shape}")
+        # combined_out = combined_ft_model.forward(combimed_data)
+        # print(f"combined_out shape: {combined_out.shape}")
+        # pred_score = pred_ft_model.forward(combined_out)
+        # print(f"Prediction score shape: {pred_score.shape}")
+
+        # models_tmp = CombinedAllModel()
+
+        # # Step 1: Initialize model
+        # models = models_tmp(
+        #     base_models=[model1, model2, model3],
+        #     combined_model=model4,
+        #     predict_model=model5
+        # )
 
 # # optimizer
 # # loss_func

@@ -1,5 +1,6 @@
 from scipy.optimize import fsolve
 import numpy as np
+import pandas as pd
 
 # # Fit a degree-3 polynomial in log(x)
 # t = np.log(x_true)
@@ -10,6 +11,9 @@ import numpy as np
 # coeffs = np.polyfit(t, y_true, 3)
 
 coeffs = np.array([0.07538848, -0.76435324,  3.6821385 , -0.24469317])
+y_true = pd.read_csv()
+print(y_true)
+
 
 # Define the polynomial function
 def poly_logx(x, y_target):

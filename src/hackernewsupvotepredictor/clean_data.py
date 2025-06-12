@@ -30,9 +30,22 @@ def prep_target(data):
     r = torch.Tensor(data['score'].values)
     r = torch.log(torch.add(r, 1.0))
     return r
+
+def prep_other_var(data, var_name):
+    r = data[var_name]
+    return r
+
 tar = prep_target(df) 
+title = prep_other_var(df, "title") 
+
+# ['id','by','title','score','url','time','user_created','user_karma']
+def get_all_data(data):
+    dt = data.copy()
+    dt['diff'] = days_between(dt['user_created'], dt['time'])
+    df = dt[['title', 'diff', 'score']]
+    return df
+all_data = get_all_data(df)
 
 torch.save(fea, "data/features.pt")
 torch.save(tar, "data/target.pt")
-
- 
+all_data.to_csv("data/all_data.csv", index=False)
