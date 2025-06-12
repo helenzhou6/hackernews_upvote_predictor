@@ -15,15 +15,21 @@ class CombineFeats(nn.Module):
         feat_len, hidden_dim, do_rate = 1, 3, 0.2
         # expected data shape
         # Input tensor shape: [batch_size, num_features, feat_dim]
-        self.lin1 = nn.Linear(feat_dim, hidden_dim) # projects each feature
-        self.lin2 = nn.Linear(hidden_dim * feat_len, 1) # combine features
+        # self.lin1 = nn.Linear(feat_dim, hidden_dim) # projects each feature
+        self.lin1 = nn.Linear(1, 3) # projects each feature
+        # self.lin2 = nn.Linear(hidden_dim * feat_len, 1) # combine features
+        self.lin2 = nn.Linear(hidden_dim, 1) # combine features
         self.dropout = nn.Dropout(do_rate)
 
     def forward(self, x):
+        print(f"combined feat dim {x.shape}")
+        x = torch.permute(x, [1,0])
+        print(f"combined feat dim {x.shape}")
+        # x = torch.unsqueeze(x)
         # x shape: [batch_size, num_feat, feat_dim]
-        x = self.lin1(x) # shape: [batch_size, num_feat, hidden_dim]
+        x = self.lin1(x) # shape: [batch_size, num_feat, hidden_dim], 500, 1, 
         x = F.relu(x) 
-        x = x.view(x.size(0), -1) # flatten: [batch_size, num_feat * hidden_dim]
+        # x = x.view(x.size(0), -1) # flatten: [batch_size, num_feat * hidden_dim]
         x = self.dropout(x)
         x = self.lin2(x) # final output layer
         return x
