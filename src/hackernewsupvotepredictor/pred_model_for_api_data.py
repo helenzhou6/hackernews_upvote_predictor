@@ -3,6 +3,7 @@ from hackernewsupvotepredictor.clean_data import title2emb, prep_features
 import torch
 import json
 import pandas as pd
+import numpy as np
 
 saved_w_pred_model = "temp/final_model.pt"    
 
@@ -23,4 +24,4 @@ def get_predicted_score(raw_data):
     model.load_state_dict(torch.load(saved_w_pred_model, weights_only=True))
 
     pred_score = model(features_b)
-    return int(pred_score.detach().numpy())
+    return int(np.exp(pred_score.detach().numpy())-1)
