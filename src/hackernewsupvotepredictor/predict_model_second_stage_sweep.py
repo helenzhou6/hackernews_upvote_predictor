@@ -23,12 +23,12 @@ num_features = fea.shape[1]
 
 # model
 class HNUP(nn.Module):
-    def __init__(self,  num_features = num_features): 
+    def __init__(self, num_hidden, num_features = num_features): 
        super().__init__()
        self.linear_relu_stack = nn.Sequential(
-            nn.Linear(num_features, 8),
+            nn.Linear(num_features, num_hidden),
             nn.ReLU(),
-            nn.Linear(8, 1),
+            nn.Linear(num_hidden, 1),
         )
     def forward(self, x):
         p = self.linear_relu_stack(x)
@@ -74,7 +74,7 @@ def make(config):
     test_loader = torch.utils.data.DataLoader(ds_test, batch_size=config.batch_size)
 
     # Make the model 
-    model = HNUP()
+    model = HNUP(num_hidden=config.num_hidden)
 
     # Make the loss and optimizer
     criterion = nn.MSELoss()
@@ -108,6 +108,7 @@ sweep_configuration = {
         "learning_rate": {"min": 0.0001, "max": 0.1},
         "batch_size": {"values": [16, 32, 64, 128, 256, 512]},
         "epochs": {"values": [10, 15, 20]},
+        "num_hidden": {"values": [4,8,16,32]},
     },
 }
 
