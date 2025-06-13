@@ -159,7 +159,7 @@ def train_cbow_model(model, tokenizer, batch_size):
 
     # Save the embeddings
     state = model.state_dict()
-    torch.save(state, 'temp/wikipedia_embeddings.pt')
+    torch.save(state['embeddings.weight'], 'temp/wikipedia_embeddings.pt')
     torch.save(state, 'temp/wikipedia_model_state.pth')
     # model = WordEmbeddings()
     # model.load_state_dict(torch.load('temp/wikipedia_model_state.pth'))
