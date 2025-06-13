@@ -3,15 +3,8 @@ from hackernewsupvotepredictor.clean_data import title2emb, prep_features
 import torch
 import json
 import pandas as pd
-from datetime import datetime, timedelta
 
-saved_w_pred_model = "temp/final_model.pt"
-
-# elements necessary for using embeddings
-with open("temp/vocabulary.json", "r") as fp:
-    vocab = json.load(fp)
-
-embs = torch.load('temp/wikipedia_embeddings.pt')            
+saved_w_pred_model = "temp/final_model.pt"    
 
 # bes test set
 def get_predicted_score(raw_data):
@@ -21,7 +14,6 @@ def get_predicted_score(raw_data):
         time=[raw_data.time],
     )
     df = pd.DataFrame(dict_data)
-    print(df)
 
     df["user_created"] = pd.to_datetime(df["user_created"], unit="s")
     df["time"] = pd.to_datetime(df["time"], unit="s")
