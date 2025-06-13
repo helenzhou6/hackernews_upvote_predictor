@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from hackernewsupvotepredictor.pred_model_for_api_data import get_predicted_score
-
 app = FastAPI()
 
 # uvicorn src.hackernewsupvotepredictor.api:app --reload to run and see it http://localhost:8000/healthcheck
