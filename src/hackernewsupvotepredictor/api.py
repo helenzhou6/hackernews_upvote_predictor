@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from hackernewsupvotepredictor.pred_model_for_api_data import get_predicted_score
 
 app = FastAPI()
 
@@ -10,10 +11,11 @@ async def healthcheck():
 
 class PostData(BaseModel):
     title: str
-    user_days: int
+    user_created: int
+    time: int
 
 # run send_post.sh to send data to see
 @app.post("/how_many_upvotes")
 def how_many_upvotes(post: PostData):
-  print(post)
-  return {"pred_upvotes": 100}
+  pred_score = get_predicted_score(post)
+  return {"pred_upvotes": pred_score}

@@ -91,10 +91,19 @@ def main(config):
         torch.save(state, 'temp/final_model.pt')
         test(model, test_dataloader, criterion)
 
+def reinstate_org_model():
+        fea, tar = load_data()
+        num_features = fea.shape[1]
+        model = define_model(num_features)
+        return model
+
 config = dict(
     epochs=201,
     batch_size=512,
     learning_rate=0.02,    
     )
 
-main(config)
+# main(config)
+
+
+
