@@ -12,6 +12,7 @@ from torch.nn.utils.rnn import pad_sequence
 import torch.optim as optim
 from datasets import Dataset
 import pandas as pd
+import numpy as np
 
 # def pad_collate(batch):
 #   (xx, yy) = zip(*batch)
@@ -79,7 +80,7 @@ def main():
     # download_hn_title_data()  # to download the title data if not already there
     with open("data/hn_title_data", "r") as f:
         hn_title_data = f.read()
-    hn_title_data = hn_title_data[:10_000]
+    hn_title_data = hn_title_data[:1_000_000]
     # title_model = WordEmbeddings(wiki_tokenizer, embedding_dim)
     # title_model.load_state_dict(torch.load('temp/wikipedia_embeddings.pt', weights_only=True))
 
@@ -91,6 +92,7 @@ def main():
     title_data = all_data["title"]
     title_tokenizer = Tokenizer(title_data.to_csv(), "temp/title_vocab.json")
     title_cbow_model = WordEmbeddings(title_tokenizer, embedding_dim)
+    # training cbow for title
     all_data["title_encoding"] = title_data.astype('str').apply(lambda title_data: [title_tokenizer.vocab[word] if title_tokenizer.vocab.get(word, None) else title_tokenizer.vocab.get("<UNKNOWN>") for title in title_data for word in tokenizer(title)])
 
     ds = Dataset.from_dict({
@@ -119,17 +121,23 @@ def main():
         )
     # combimed_data = combine_feat()
 
-    lr = 0.01
+    # lr_rate = [0.3, 0.1, 0.03, 0.01, 0.003, 0.001]
+    # save_final_score = {}
+    # for lr in lr_rate:
+    #     print(f"lr is {lr}")
+    # save_final_score[lr] = []
+    lr=0.01
     criterion = nn.MSELoss() # this is for torch.float data
     optimizer = optim.Adam(models.parameters(), lr=lr)
 
     # train
+    print("train session")
     for epoch in range(num_epochs):
+        losses = []
         for batch_idx, data in enumerate(train_dataloader):
             titles_b = data["title"] # [4,100] or [batch, word_lengh]
             users_b = data["user_days"] # [4,1] or [batch, single_score]
             target_b = data["label"] # [4,1] or [batch, single_score]
-            # target_b = target_b.unsqueeze(1)  # shape: [4, 1]
 
             data_b = (titles_b, users_b)
 
@@ -139,8 +147,12 @@ def main():
             loss = criterion(outputs, target_b)
             loss.backward()
             optimizer.step()
-        
-        print(f'Epoch {epoch+1}, Loss: {loss.item():.4f}')
+            losses.append(loss)
+        mean_loss = torch.stack(losses).mean()
+        print(f'Epoch {epoch+1}, Loss: {mean_loss.item():.4f}')
+        # save_final_score[lr].append(np.round(loss.item()))
+    
+    # print(save_final_score)
 
         # test_input_format_cbow_model(cbow_model, title_tokenizer, batch_size)    
         # user_days_raw = hacker_news_data["user_account_date"]
@@ -158,6 +170,23 @@ def main():
         #     combined_model=model4,
         #     predict_model=model5
         # )
+
+    print("test session")
+    with torch.no_grad():
+        models.eval()
+        losses = []
+        for batch_idx, data in enumerate(test_dataloader):
+            titles_b = data["title"] # [4,100] or [batch, word_lengh]
+            users_b = data["user_days"] # [4,1] or [batch, single_score]
+            target_b = data["label"] # [4,1] or [batch, single_score]
+            # target_b = target_b.unsqueeze(1)  # shape: [4, 1]
+
+            data_b = (titles_b, users_b)
+            outputs = models(data_b)
+            loss = criterion(outputs, target_b)
+            losses.append(loss)
+        mean_loss = torch.stack(losses).mean()
+        print(f'Loss: {mean_loss.item():.4f}')
 
 # # optimizer
 # # loss_func
