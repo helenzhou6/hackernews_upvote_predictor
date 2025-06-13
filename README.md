@@ -34,6 +34,12 @@ Ensure initial python set up has been done
 5. Run `predict_model_second_stage.py` that will train another model on the feature of how many days since the user has been created + title to give final output (score prediction)
 - This will output the loss functions for each run
 
+### How to run the api
+1. Run `uvicorn src.hackernewsupvotepredictor.api:app --reload` to run the API server
+- You should be able to see in http://localhost:8000/healthcheck to see it up and running
+2. Then edit the send_post.sh bash script with your custom values
+3. Run send_post.sh to see the predicted upvote from the model
+
 ## How to make changes to the codebase
 1. Ensure you are on the main branch `git checkout main`
 2. Pull down any new changes `git pull` (you may have merge conflicts, resolve those)
