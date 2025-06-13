@@ -16,7 +16,7 @@ torch.cuda.manual_seed_all(hash("so runs are repeatable") % 2**32 - 1)
 
 # set the dimension of embeddings
 embedding_dim = 64
-num_words = 20000
+num_words = 50000
 
 # read Wikipedia data and tokenize
 with open("data/text8", "r") as f:
@@ -163,9 +163,9 @@ def test(model, test_loader, device):
     
 #### wandb pieces
 config = dict(
-    epochs=20,
-    batch_size=512,
-    learning_rate=0.005,
+    epochs=15,
+    batch_size=256,
+    learning_rate=0.023,
     )
 
 def make(config):
@@ -199,11 +199,12 @@ def model_pipeline(hyperparameters):
 
       # and use them to train the model
       train(model, train_loader, criterion, optimizer, config, device)
-
+      state = model.state_dict()
+      torch.save(state['embeddings.weight'], 'temp/wikipedia_embeddings.pt')
+      
       # and test its final performance
       test(model, test_loader, device)
 
     return model
 
 model_pipeline(config)
- 
