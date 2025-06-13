@@ -123,75 +123,75 @@ def main():
         # pred_ft_model
         )
 
-    # lr_rate = [0.3, 0.1, 0.03, 0.01, 0.003, 0.001]
-    # save_final_score = {}
-    # for lr in lr_rate:
-    #     print(f"lr is {lr}")
-    # save_final_score[lr] = []
-    lr=0.01
-    criterion = nn.MSELoss() # this is for torch.float data
-    optimizer = optim.Adam(models.parameters(), lr=lr)
+    lr_rate = [0.1, 0.03, 0.01, 0.003, 0.001]
+    save_final_score = {}
+    for lr in lr_rate:
+        print(f"lr is {lr}")
+        save_final_score[lr] = []
+        # lr=0.01
+        criterion = nn.MSELoss() # this is for torch.float data
+        optimizer = optim.Adam(models.parameters(), lr=lr)
 
-    # train
-    print("train session")
-    for epoch in range(num_epochs):
-        losses = []
-        for batch_idx, data in enumerate(train_dataloader):
-            titles_b = data["title"] # [4,100] or [batch, word_lengh]
-            users_b = data["user_days"] # [4,1] or [batch, single_score]
-            target_b = data["label"] # [4,1] or [batch, single_score]
+        # train
+        print("train session")
+        for epoch in range(num_epochs):
+            losses = []
+            for batch_idx, data in enumerate(train_dataloader):
+                titles_b = data["title"] # [4,100] or [batch, word_lengh]
+                users_b = data["user_days"] # [4,1] or [batch, single_score]
+                target_b = data["label"] # [4,1] or [batch, single_score]
 
-            data_b = (titles_b, users_b)
+                data_b = (titles_b, users_b)
 
-            optimizer.zero_grad()
-            outputs = models(data_b)
-            pred = get_final_pred(outputs)  # should depend on model output
+                optimizer.zero_grad()
+                outputs = models(data_b)
+                pred = get_final_pred(outputs)  # should depend on model output
 
-            # loss = criterion(outputs, target_b)
-            loss = criterion(pred, target_b)
-            
-            loss.backward()
-            optimizer.step()
-            losses.append(loss)
-        mean_loss = torch.stack(losses).mean()
-        print(f'Epoch {epoch+1}, Loss: {mean_loss.item():.4f}')
-        # save_final_score[lr].append(np.round(loss.item()))
-    
-    # print(save_final_score)
+                # loss = criterion(outputs, target_b)
+                loss = criterion(pred, target_b)
 
-        # test_input_format_cbow_model(cbow_model, title_tokenizer, batch_size)    
-        # user_days_raw = hacker_news_data["user_account_date"]
-        # print(f"combimed_data shape: {combimed_data.shape}")
-        # combined_out = combined_ft_model.forward(combimed_data)
-        # print(f"combined_out shape: {combined_out.shape}")
-        # pred_score = pred_ft_model.forward(combined_out)
-        # print(f"Prediction score shape: {pred_score.shape}")
+                loss.backward()
+                optimizer.step()
+                losses.append(loss)
+            mean_loss = torch.stack(losses).mean()
+            print(f'Epoch {epoch+1}, Loss: {mean_loss.item():.4f}')
+            # save_final_score[lr].append(np.round(loss.item()))
+        
+        # print(save_final_score)
 
-        # models_tmp = CombinedAllModel()
+            # test_input_format_cbow_model(cbow_model, title_tokenizer, batch_size)    
+            # user_days_raw = hacker_news_data["user_account_date"]
+            # print(f"combimed_data shape: {combimed_data.shape}")
+            # combined_out = combined_ft_model.forward(combimed_data)
+            # print(f"combined_out shape: {combined_out.shape}")
+            # pred_score = pred_ft_model.forward(combined_out)
+            # print(f"Prediction score shape: {pred_score.shape}")
 
-        # # Step 1: Initialize model
-        # models = models_tmp(
-        #     base_models=[model1, model2, model3],
-        #     combined_model=model4,
-        #     predict_model=model5
-        # )
+            # models_tmp = CombinedAllModel()
 
-    print("test session")
-    with torch.no_grad():
-        models.eval()
-        losses = []
-        for batch_idx, data in enumerate(test_dataloader):
-            titles_b = data["title"] # [4,100] or [batch, word_lengh]
-            users_b = data["user_days"] # [4,1] or [batch, single_score]
-            target_b = data["label"] # [4,1] or [batch, single_score]
-            # target_b = target_b.unsqueeze(1)  # shape: [4, 1]
+            # # Step 1: Initialize model
+            # models = models_tmp(
+            #     base_models=[model1, model2, model3],
+            #     combined_model=model4,
+            #     predict_model=model5
+            # )
 
-            data_b = (titles_b, users_b)
-            outputs = models(data_b)
-            loss = criterion(outputs, target_b)
-            losses.append(loss)
-        mean_loss = torch.stack(losses).mean()
-        print(f'Loss: {mean_loss.item():.4f}')
+        print("test session")
+        with torch.no_grad():
+            models.eval()
+            losses = []
+            for batch_idx, data in enumerate(test_dataloader):
+                titles_b = data["title"] # [4,100] or [batch, word_lengh]
+                users_b = data["user_days"] # [4,1] or [batch, single_score]
+                target_b = data["label"] # [4,1] or [batch, single_score]
+                # target_b = target_b.unsqueeze(1)  # shape: [4, 1]
+
+                data_b = (titles_b, users_b)
+                outputs = models(data_b)
+                loss = criterion(outputs, target_b)
+                losses.append(loss)
+            mean_loss = torch.stack(losses).mean()
+            print(f'Loss: {mean_loss.item():.4f}')
 
 # # optimizer
 # # loss_func
