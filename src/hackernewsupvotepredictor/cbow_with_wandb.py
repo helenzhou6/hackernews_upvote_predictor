@@ -65,8 +65,6 @@ vocab = {word: index for index, word in enumerate(revvocab)}
 # Save the vocabulary
 with open("temp/vocabulary.json", "w") as fp:
     json.dump(vocab, fp)
-# with open("temp/vocabulary.json", "r") as fp:
-#     vocab = json.loads(fp)
 
 # encode
 encoded = [vocab.get(w, vocab["<UNKNOWN>"]) for w in updtext]
