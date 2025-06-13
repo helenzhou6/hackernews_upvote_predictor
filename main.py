@@ -74,6 +74,8 @@ def main():
     # Training Setup
     wiki_tokenizer = Tokenizer(wiki_data, "temp/vocabulary.json")
     cbow_model = WordEmbeddings(wiki_tokenizer, embedding_dim)
+    # print(cbow_model)
+
     train_cbow_model(cbow_model, wiki_tokenizer, batch_size)
 
     # Loading the embeddings into title CBOW model
@@ -81,7 +83,7 @@ def main():
     with open("data/hn_title_data", "r") as f:
         hn_title_data = f.read()
     hn_title_data = hn_title_data[:1_000_000]
-    # title_model = WordEmbeddings(wiki_tokenizer, embedding_dim)
+    title_model = WordEmbeddings(wiki_tokenizer, embedding_dim)
     # title_model.load_state_dict(torch.load('temp/wikipedia_embeddings.pt', weights_only=True))
 
     ### Combine the features into a combined ML model
@@ -92,6 +94,7 @@ def main():
     title_data = all_data["title"]
     title_tokenizer = Tokenizer(title_data.to_csv(), "temp/title_vocab.json")
     title_cbow_model = WordEmbeddings(title_tokenizer, embedding_dim)
+    # print(title_cbow_model)
     # training cbow for title
     all_data["title_encoding"] = title_data.astype('str').apply(lambda title_data: [title_tokenizer.vocab[word] if title_tokenizer.vocab.get(word, None) else title_tokenizer.vocab.get("<UNKNOWN>") for title in title_data for word in tokenizer(title)])
 
@@ -119,7 +122,6 @@ def main():
         combined_ft_model, 
         # pred_ft_model
         )
-    # combimed_data = combine_feat()
 
     # lr_rate = [0.3, 0.1, 0.03, 0.01, 0.003, 0.001]
     # save_final_score = {}
@@ -143,8 +145,11 @@ def main():
 
             optimizer.zero_grad()
             outputs = models(data_b)
+            pred = get_final_pred(outputs)  # should depend on model output
 
-            loss = criterion(outputs, target_b)
+            # loss = criterion(outputs, target_b)
+            loss = criterion(pred, target_b)
+            
             loss.backward()
             optimizer.step()
             losses.append(loss)
