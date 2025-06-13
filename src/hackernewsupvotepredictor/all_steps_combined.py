@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from hackernewsupvotepredictor.predict_model2 import get_final_pred
+# from hackernewsupvotepredictor.predict_model2 import get_final_pred
 
 class CombinedAllModel(nn.Module):
     def __init__(self, 
@@ -49,8 +49,8 @@ class CombinedAllModel(nn.Module):
         # Combine outputs
         combined = self.combined_model(*outputs)
 
-        # Predict
-        result = torch.round(get_final_pred(combined))
-        # result = torch.round(self.predict_model(combined))
-        return result
+        # # Predict
+        # result = torch.round(get_final_pred(combined))
+        # # result = torch.round(self.predict_model(combined))
+        return combined
 
