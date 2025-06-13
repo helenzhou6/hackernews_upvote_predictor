@@ -15,18 +15,16 @@ Needed:
     MODEL_API_URL=xxx
     DATABASE_API_URL=xxx
     ```
+- To run `wandb` - make sure your account is set up
 
 ### Initial python set up
 To run the hackernews upvote predictor python files:
-2. `source .venv/bin/activate` to use the poetry virtual environment created
+1. `uv sync` to install project requirements and have uv set up poetry virtual env
+2. `source .venv/bin/activate` to use the virtual environment created by uv
     - (To deactivate virtual env if needed, run `deactivate`)
-3. `uv sync` to install project requirements.
-4. On Mac and VSCode, run Shift Command P and select interpreter as the poetry env created (using .venv within directory), and can run the python files
+3. On Mac and VSCode, run Shift Command P and select interpreter as the env created by uv (using .venv within directory), and this set up means you can run the python files
 
-### Hacker news database > items info
-- Column info: id, dead, type, by, time, text, parent, kids, url, score, title, descandants 
-
-## Sequence of running
+### Sequence of running
 Ensure initial python set up has been done
 0. Add a data and temp folder to root
 1. Run `connect_and_download.py` file - this will connect to the database, and download the hackernews items (joined with user data) into a parquet file
@@ -34,6 +32,7 @@ Ensure initial python set up has been done
 3. Run `cbow.py` to run the CBOW code
 4. Run `clean_data.py` which will read the above parquet file, and then extract the feature data of how many days the user has existed, title data, as well as the target data (the upvote score)
 5. Run `predict_model_second_stage.py` that will train another model on the feature of how many days since the user has been created + title to give final output (score prediction)
+- This will output the loss functions for each run
 
 ## How to make changes to the codebase
 1. Ensure you are on the main branch `git checkout main`
@@ -43,3 +42,7 @@ Ensure initial python set up has been done
 5. Commit the changes `git commit -m <commit message>`
 6. Push changes to remote (github) - `git push` (you may need to do `git push --set-upstream origin <branch name>` if the branch doesn't exist on remote)
 7. Go to github.com and make a pull request using the branch name
+
+## Other
+### Hacker news database > items info
+- Column info: id, dead, type, by, time, text, parent, kids, url, score, title, descandants 
