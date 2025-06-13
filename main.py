@@ -3,7 +3,8 @@ from hackernewsupvotepredictor.cbow import WordEmbeddings, train_cbow_model, Tok
 from hackernewsupvotepredictor.combined_feats import CombineFeats, combine_feat
 from hackernewsupvotepredictor.download_hn_title_data import download_hn_title_data
 from hackernewsupvotepredictor.all_steps_combined import CombinedAllModel
-from hackernewsupvotepredictor.predict_model import HNUP
+# from hackernewsupvotepredictor.predict_model import HNUP
+from hackernewsupvotepredictor.predict_model2 import get_final_pred
 import torch.nn as nn
 import torch
 from torch.utils.data import DataLoader
@@ -104,11 +105,18 @@ def main():
     test_dataloader = DataLoader(test_ds, batch_size=4, collate_fn=pad_collate)
 
     # define models
-    pred_ft_model = HNUP()
+    pred_ft_model = get_final_pred
     combined_ft_model = CombineFeats(500)
 
+    for param in title_cbow_model.parameters():
+        param.requires_grad = False
+
     base_models = [title_cbow_model]
-    models = CombinedAllModel(base_models, combined_ft_model, pred_ft_model)
+    models = CombinedAllModel(
+        base_models, 
+        combined_ft_model, 
+        # pred_ft_model
+        )
     # combimed_data = combine_feat()
 
     lr = 0.01
