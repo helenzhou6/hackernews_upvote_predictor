@@ -78,10 +78,10 @@ class WordEmbeddings(nn.Module):
         self.linear_1 = nn.Linear(in_features=embedding_dim, out_features=len(tokenizer.vocab))
         self.tokenizer = tokenizer
 
-    def forward(self, x):
-        x = self.embeddings(x)
-        x = x.mean(axis=1)
-        x = self.linear_1(x)
+    def forward(self, x): 
+        x = self.embeddings(x) # input shape [batch, word_len] -> encoded input [batch, word_len, embed_dim]
+        x = x.mean(axis=1) # encoded input [batch, word_len, embed_dim] -> mean enc [batch, embed_dim]
+        x = self.linear_1(x) # mean enc [batch, embed_dim] -> lin transform [batch, num_emb]
         return x
     
 # rolling windows of 5 words

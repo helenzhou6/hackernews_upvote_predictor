@@ -22,7 +22,8 @@ import pandas as pd
 
 #   return xx_pad, yy_pad, x_lens, y_lens
 
-def pad_collate(batch, max_len=100):
+# some of them had a seq_len around 120
+def pad_collate(batch, max_len=150):
     # Extract each field into separate lists
     titles = [item["title"] for item in batch]
     # user_days = [item["user_days"] for item in batch]
@@ -46,18 +47,22 @@ def pad_collate(batch, max_len=100):
     # # Stack scalar labels into a tensor
     # labels = torch.stack(labels)
 
+    # Convert user_days and label to tensors
+    user_days = torch.tensor([item["user_days"] for item in batch], dtype=torch.float32).unsqueeze(1)
+    labels = torch.tensor([item["label"] for item in batch], dtype=torch.float32).unsqueeze(1)
+
     return {
         "title": titles_padded,
-        "user_days": [item["user_days"] for item in batch],
-        "label": [item["label"] for item in batch],
+        "user_days": user_days,
+        "label": labels,
         # "title_lens": title_lens,
     }
-
 
 def main():
     # set the dimension of embeddings
     embedding_dim = 64
     batch_size = 512
+    num_epochs = 5
 
     # Run download_cbow_rawdata.py to download
     with open("data/text8", "r") as f:
@@ -74,8 +79,8 @@ def main():
     with open("data/hn_title_data", "r") as f:
         hn_title_data = f.read()
     hn_title_data = hn_title_data[:10_000]
-    title_model = WordEmbeddings(wiki_tokenizer, embedding_dim)
-    title_model.load_state_dict(torch.load('temp/wikipedia_embeddings.pt', weights_only=True))
+    # title_model = WordEmbeddings(wiki_tokenizer, embedding_dim)
+    # title_model.load_state_dict(torch.load('temp/wikipedia_embeddings.pt', weights_only=True))
 
     ### Combine the features into a combined ML model
     # Num of days user has been around as first feature - ML predict output. Output is FloatTensor
@@ -84,6 +89,7 @@ def main():
     all_data = pd.read_csv("data/all_data.csv")
     title_data = all_data["title"]
     title_tokenizer = Tokenizer(title_data.to_csv(), "temp/title_vocab.json")
+    title_cbow_model = WordEmbeddings(title_tokenizer, embedding_dim)
     all_data["title_encoding"] = title_data.astype('str').apply(lambda title_data: [title_tokenizer.vocab[word] if title_tokenizer.vocab.get(word, None) else title_tokenizer.vocab.get("<UNKNOWN>") for title in title_data for word in tokenizer(title)])
 
     ds = Dataset.from_dict({
@@ -93,8 +99,6 @@ def main():
         }
         ).with_format("torch")
 
-    print(f"this is dataset format {ds}")
-
     train_ds, test_ds = torch.utils.data.random_split(ds, [0.9, 0.1])
     train_dataloader = DataLoader(train_ds, batch_size=4, collate_fn=pad_collate)
     test_dataloader = DataLoader(test_ds, batch_size=4, collate_fn=pad_collate)
@@ -103,29 +107,32 @@ def main():
     pred_ft_model = HNUP()
     combined_ft_model = CombineFeats(500)
 
-    base_models = [title_model]
+    base_models = [title_cbow_model]
     models = CombinedAllModel(base_models, combined_ft_model, pred_ft_model)
     # combimed_data = combine_feat()
 
     lr = 0.01
-    criterion = nn.MSELoss()
+    criterion = nn.MSELoss() # this is for torch.float data
     optimizer = optim.Adam(models.parameters(), lr=lr)
 
     # train
-    for batch_idx, data in enumerate(train_dataloader):
-        titles_b = data["title"] # [4,100] or [batch, word_lengh]
-        users_b = data["user_days"] # [4,1] or [batch, single_score]
-        target_b = data["label"] # [4,1] or [batch, single_score]
+    for epoch in range(num_epochs):
+        for batch_idx, data in enumerate(train_dataloader):
+            titles_b = data["title"] # [4,100] or [batch, word_lengh]
+            users_b = data["user_days"] # [4,1] or [batch, single_score]
+            target_b = data["label"] # [4,1] or [batch, single_score]
+            # target_b = target_b.unsqueeze(1)  # shape: [4, 1]
 
-        data_b = (titles_b, users_b)
+            data_b = (titles_b, users_b)
 
-        optimizer.zero_grad()
-        outputs = models(data_b)
-        loss = criterion(outputs, target_b)
-        loss.backward()
-        optimizer.step()
-    
-    print(f'Loss: {loss.item():.4f}')
+            optimizer.zero_grad()
+            outputs = models(data_b)
+
+            loss = criterion(outputs, target_b)
+            loss.backward()
+            optimizer.step()
+        
+        print(f'Epoch {epoch+1}, Loss: {loss.item():.4f}')
 
         # test_input_format_cbow_model(cbow_model, title_tokenizer, batch_size)    
         # user_days_raw = hacker_news_data["user_account_date"]
