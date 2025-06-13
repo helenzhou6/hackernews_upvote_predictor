@@ -50,7 +50,7 @@ def train(model, num_epochs, train_dataloader, optimizer, criterion):
             optimizer.step()
             losses.append(loss)
         mean_loss = torch.stack(losses).mean()
-        if epoch % 50 == 0:
+        if epoch % 100 == 0:
             wandb.log({"epoch": epoch, "loss": float(mean_loss.item())})
             print(f'Epoch {epoch+1}, Loss: {mean_loss.item():.4f}') 
 
@@ -88,11 +88,11 @@ def main(config):
 
         train(model, epochs, train_dataloader, optimizer, criterion)
         state = model.state_dict()
-        torch.save(state, 'temp/final_model.pt')
+        torch.save(state['embeddings.weight'], 'temp/wikipedia_embeddings.pt')
         test(model, test_dataloader, criterion)
 
 config = dict(
-    epochs=201,
+    epochs=200,
     batch_size=512,
     learning_rate=0.02,    
     )
