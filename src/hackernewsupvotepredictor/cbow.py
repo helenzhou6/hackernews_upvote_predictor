@@ -168,18 +168,18 @@ def train_cbow_model(model, tokenizer, batch_size):
 
 
 # To actually run cbow.py - uncomment out the following code and run the file:
-# embedding_dim = 64
-# batch_size = 512
-# num_epochs = 5
+embedding_dim = 64
+batch_size = 512
+num_epochs = 5
 
-# # Run download_cbow_rawdata.py to download
-# with open("data/text8", "r") as f:
-#     wiki_data = f.read()
-# wiki_data= wiki_data[:100000]
+# Run download_cbow_rawdata.py to download
+with open("data/text8", "r") as f:
+    wiki_data = f.read()
+wiki_data= wiki_data[:100000]
 
-# # Training Setup
-# wiki_tokenizer = Tokenizer(wiki_data, "temp/vocabulary.json")
-# cbow_model = WordEmbeddings(wiki_tokenizer, embedding_dim)
-# # print(cbow_model)
+# Training Setup
+wiki_tokenizer = Tokenizer(wiki_data, "temp/vocabulary.json")
+cbow_model = WordEmbeddings(wiki_tokenizer, embedding_dim)
+# print(cbow_model)
 
-# train_cbow_model(cbow_model, wiki_tokenizer, batch_size)
+train_cbow_model(cbow_model, wiki_tokenizer, batch_size)
