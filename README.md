@@ -31,8 +31,8 @@ Ensure initial python set up has been done
 0. Add a data and temp folder to root
 1. Run `connect_and_download.py` file - this will connect to the database, and download the hackernews items (joined with user data) into a parquet file
 2. Run `download_cbow_rawdata.py` that will download the wikipedia text data to data/text8
-3. Run `clean_data.py` which will read the above parquet file, and then extract the feature data of how many days the user has existed, title data, as well as the target data (the upvote score)
-4. Run `cbow.py` to run the CBOW code
+3. Run `cbow.py` to run the CBOW code
+4. Run `clean_data.py` which will read the above parquet file, and then extract the feature data of how many days the user has existed, title data, as well as the target data (the upvote score)
 5. Run `predict_model_second_stage.py` that will train another model on the feature of how many days since the user has been created + title to give final output (score prediction)
 
 ## How to make changes to the codebase
